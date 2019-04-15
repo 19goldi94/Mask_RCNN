@@ -14,6 +14,10 @@ Usage: import the module (see Jupyter notebooks for examples), or run from
     python postit.py train --dataset=/path/to/postit/dataset --weights=last
     # 
     python postit.py detect --weights=/path/to/weights/file.h5 --image=<URL or path to file>
+    
+python postit.py train --dataset=C:/Users/chris/Downloads/PostIt_Segmentation/images --weights=C:/Users/chris/Downloads/PostIt_Segmentation/mask_rcnn_coco.h5
+
+    
 """
 
 # Root directory of the project
@@ -61,10 +65,10 @@ class PostDataset(utils.Dataset):
 
         assert subset in ["train", "val"]
 
-        dataset_dir = os.path.abspath("../../Coco")
+        #dataset_dir = os.path.abspath("../../Coco")
 
-        # dataset_dir = os.path.join(dataset_dir, subset)
-        dataset_dir = os.path.join(dataset_dir, "train")
+        dataset_dir = os.path.join(dataset_dir, subset)
+        #dataset_dir = os.path.join(dataset_dir, "train")
 
         # load json file
         data_json = json.load(open(os.path.join(dataset_dir, "output.json")))
@@ -141,6 +145,13 @@ def detectpostit(image, image_path=None):
     r = model.detect([image], verbose=1)[0]
     m = r['masks']
     m = np.sum(m * np.arange(1, m.shape[-1] + 1), -1)
+    
+    for i in range(len(m)):
+        for j in range(len(m[0])):
+            if m[i][j] > 5:
+                m[i][j] = 255
+            else:
+                m[i][j] = 0
 
     import imageio
     file_name = "postit_{:%Y%m%dT%H%M%S}.png".format(datetime.datetime.now())
